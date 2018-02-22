@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Vector;
 public class KotesPanel extends JPanel implements ActionListener {
+	private TextAreaContentManager contentManager;
 	protected JComboBox comboBox;	
 	protected JTextArea textArea;
 	private List<Entry> Entries;
@@ -22,11 +23,12 @@ public class KotesPanel extends JPanel implements ActionListener {
 		Entries = new ArrayList<Entry>();
 		loadFile("allnotes.txt");
 		textArea = new JTextArea(text,5, 20);
-		comboBox = new AutoComboBox(autocomplete, textArea);
+		contentManager = new TextAreaContentManager(Entries, textArea);
+		comboBox = new AutoComboBox(autocomplete, contentManager);
 		//		comboBox.putClientProperty("JComboBox.isTableCellEditor", Boolean.TRUE);
 		//		comboBox.setFocusTraversalKeysEnabled(false);
 			//textField.addActionListener(this);
-		textArea.setEditable(false);
+		textArea.setEditable(true);
 		JScrollPane scrollPane = new JScrollPane(textArea);
 
 		//Add Components to this panel.

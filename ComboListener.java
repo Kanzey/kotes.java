@@ -4,25 +4,26 @@ import java.util.Vector;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JComboBox;
 import javax.swing.JTextField;
-import javax.swing.JTextArea;
 
 public class ComboListener extends KeyAdapter
 {
 	JComboBox cbListener;
-	JTextArea textArea;
 	Vector<String> options;
-
-	public ComboListener(JComboBox cbListenerParam, Vector<String> options, JTextArea textArea)
+	TextAreaContentManager contentManager;
+	
+	public ComboListener(JComboBox cbListenerParam, Vector<String> options, TextAreaContentManager contentManager)
 	{
 		cbListener = cbListenerParam;
-		this.textArea = textArea;
 		this.options = options;
+		this.contentManager = contentManager;
 	}
 
 	public void keyPressed(KeyEvent evt){
 		if(evt.getKeyCode() == KeyEvent.VK_ENTER){
 			String text = ((JTextField)evt.getSource()).getText();
-			textArea.setText(text);
+			contentManager.setTag(text);
+			cbListener.setModel(new DefaultComboBoxModel(options));
+			((JTextField)cbListener.getEditor().getEditorComponent()).setText(text);
 			cbListener.hidePopup();
 		}
 	}
@@ -31,16 +32,16 @@ public class ComboListener extends KeyAdapter
 	{
 		if(evt.getKeyCode() == KeyEvent.VK_TAB ){
 			if(cbListener.getItemCount() > 0)
-			cbListener.setSelectedIndex(
-					(cbListener.getSelectedIndex() +1) % cbListener.getItemCount());
+				cbListener.setSelectedIndex(
+						(cbListener.getSelectedIndex() +1) % cbListener.getItemCount());
 			return;
 		}
 		if(!evt.isActionKey() && evt.getKeyCode() != KeyEvent.VK_ENTER){
-		String text = ((JTextField)evt.getSource()).getText();
-		cbListener.setModel(new DefaultComboBoxModel(getFilteredList(text)));
-		cbListener.setSelectedIndex(-1);
-		((JTextField)cbListener.getEditor().getEditorComponent()).setText(text);
-		cbListener.showPopup();
+			String text = ((JTextField)evt.getSource()).getText();
+			cbListener.setModel(new DefaultComboBoxModel(getFilteredList(text)));
+			cbListener.setSelectedIndex(-1);
+			((JTextField)cbListener.getEditor().getEditorComponent()).setText(text);
+			cbListener.showPopup();
 		}
 	}
 
