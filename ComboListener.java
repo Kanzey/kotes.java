@@ -9,9 +9,9 @@ public class ComboListener extends KeyAdapter
 {
 	JComboBox cbListener;
 	Vector<String> options;
-	TextAreaContentManager contentManager;
+	TextContentManager contentManager;
 	
-	public ComboListener(JComboBox cbListenerParam, Vector<String> options, TextAreaContentManager contentManager)
+	public ComboListener(JComboBox cbListenerParam, Vector<String> options, TextContentManager contentManager)
 	{
 		cbListener = cbListenerParam;
 		this.options = options;

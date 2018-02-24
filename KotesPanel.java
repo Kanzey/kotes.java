@@ -9,11 +9,15 @@ import java.util.List;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Vector;
+import java.util.Map;
+import java.util.HashMap;
+
 public class KotesPanel extends JPanel implements ActionListener {
-	private TextAreaContentManager contentManager;
+	private TextContentManager contentManager;
 	protected JComboBox comboBox;	
-	protected JTextArea textArea;
+	protected JEditorPane textEditor;
 	private List<Entry> Entries;
+	private Map<String, Tag> tagMap;
 	private Vector<String> autocomplete;
 	private String text ="";
 	private final static String newline = "\n";
@@ -22,14 +26,14 @@ public class KotesPanel extends JPanel implements ActionListener {
 		super(new GridBagLayout());
 		Entries = new ArrayList<Entry>();
 		loadFile("allnotes.txt");
-		textArea = new JTextArea(text,5, 20);
-		contentManager = new TextAreaContentManager(Entries, textArea);
+		textEditor = new JEditorPane("text/plain",text);
+		contentManager = new TextContentManager(tagMap, textEditor);
 		comboBox = new AutoComboBox(autocomplete, contentManager);
 		//		comboBox.putClientProperty("JComboBox.isTableCellEditor", Boolean.TRUE);
 		//		comboBox.setFocusTraversalKeysEnabled(false);
-			//textField.addActionListener(this);
-		textArea.setEditable(true);
-		JScrollPane scrollPane = new JScrollPane(textArea);
+		//textField.addActionListener(this);
+		textEditor.setEditable(true);
+		JScrollPane scrollPane = new JScrollPane(textEditor);
 
 		//Add Components to this panel.
 		GridBagConstraints c = new GridBagConstraints();
@@ -55,26 +59,28 @@ public class KotesPanel extends JPanel implements ActionListener {
 			byte[] data = new byte[(int) file.length()];
 			fis.read(data);
 			fis.close();
+			tagMap = new HashMap<String,Tag>(); 
 			String[] Tags = new String(data, "UTF-8").split("\\r?\\n#");
 			for(String s: Tags){
-				String[] Tag = s.split("\\r?\\n",2);
+				String[] tag = s.split("\\r?\\n",2);
 				String text = "";
-				if(Tag.length == 2)
-					text = Tag[1];
-				Entries.add( new Entry(Tag[0].trim(), text));
-			}
-			Entries.get(0).repair();
-			HashSet<String> hs= new HashSet<String>();
-			for(Entry e: Entries){
-				for(String s:e.getTags()){
-					hs.add(s);
+				if(tag.length == 2)
+					text = tag[1];
+				List<Tag> list = new ArrayList<Tag>();
+				for(String ss: tag[0].trim().split("\\s+#") ){
+					Tag t = tagMap.get(ss);
+					if(t == null){
+						t = new Tag(ss);
+						tagMap.put(ss,t);
+					}
+					list.add(t);
 				}
+				Entry e = new Entry(list, text);
+				Entries.add( e );
+				for(Tag t:list)
+					t.addEntry(e);
 			}
-			autocomplete = new Vector<String>(hs);
-			System.out.println(hs.size());
-			for(String s: hs){
-				System.out.println(s);
-			}
+			autocomplete = new Vector<String>(tagMap.keySet());
 		} catch (FileNotFoundException e){                                         
 
 		} catch (UnsupportedEncodingException e){                                  
@@ -89,13 +95,13 @@ public class KotesPanel extends JPanel implements ActionListener {
 			int i=0;
 			try{
 			i = Integer.parseInt(text);
-			textArea.setText(Entries.get(i).getText());
+			textEditor.setText(Entries.get(i).getText());
 			}catch(NumberFormatException e){
 			}
 			textField.selectAll();
 
-		textArea.setCaretPosition(textArea.getDocument().getLength());
-		*/	}
+			textEditor.setCaretPosition(textEditor.getDocument().getLength());
+			*/	}
 
 		private static void createAndShowGUI() {
 			JFrame frame = new JFrame("Kotes");

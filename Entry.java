@@ -1,23 +1,23 @@
-
+import java.util.List;
 
 public class Entry{
-	private String[] Tags;
+	private List<Tag> Tags;
 	private String Text;
 
 	public Entry(){
 
 	}
 
-	public Entry(String tags, String text){
-		this.Tags = tags.split("\\s+#");
+	public Entry(List<Tag> tags, String text){
+		this.Tags = tags; 
 		this.Text =	text;
 	}
 
-	public String[] getTags(){
+	public List<Tag> getTags(){
 		return this.Tags;
 	}
 
-	public void setTags(String[] tags){
+	public void setTags(List<Tag> tags){
 		this.Tags = tags;
 	}
 
@@ -27,9 +27,5 @@ public class Entry{
 
 	public void setText(String text){
 		this.Text = text;
-	}
-
-	public void repair(){
-		Tags[0] = Tags[0].substring(1);
 	}
 }
