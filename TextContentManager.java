@@ -1,7 +1,9 @@
 import java.util.List;
+import java.util.Collection;
 import java.util.ArrayList;
 import java.lang.StringBuilder;
 import javax.swing.text.*;
+import javax.swing.JTabbedPane;
 import java.awt.Color;
 import java.util.Map;
 import javax.swing.text.DefaultHighlighter.DefaultHighlightPainter;
@@ -9,18 +11,30 @@ import javax.swing.text.DefaultHighlighter.DefaultHighlightPainter;
 public class TextContentManager{
 	private JTextComponent textComponent;
 	private Map<String,Tag> tagMap;
+	private JTabbedPane tabbedPane;
+	private Tag currentTag;
 
-	public TextContentManager(Map<String,Tag> tagMap, JTextComponent textComponent){
+	public TextContentManager(Map<String,Tag> tagMap, JTextComponent textComponent, JTabbedPane tabbedPane){
 		this.tagMap = tagMap;
 		this.textComponent = textComponent;
+		this.tabbedPane = tabbedPane;
 	}
 
 	public void setTag(String tagString){
 		List<HighlightData> hList = new ArrayList<HighlightData>();
 		StringBuilder sb = new StringBuilder();
 		Tag mainTag = tagMap.get(tagString);
+		tabbedPane.setTitleAt(tabbedPane.getSelectedIndex(), tagString);
+		if (currentTag == mainTag)
+			return;
+		Collection<Entry> entries;
+		if(mainTag != null)
+			entries = mainTag.getEntries();
+		else
+			return;
 
-		for(Entry e:mainTag.getEntries()){
+		currentTag = mainTag;
+		for(Entry e:entries){
 			for(Tag tag :e.getTags()){
 				int begin = sb.length();
 				sb.append("#");
@@ -35,6 +49,7 @@ public class TextContentManager{
 		textComponent.setText(sb.toString());
 		for(HighlightData hd: hList)
 			highlight(hd);
+		System.out.println(Mem.get());
 	}
 
 	public void highlight(HighlightData hData){

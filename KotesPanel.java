@@ -3,7 +3,8 @@
 import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
-
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import java.io.*;
 import java.util.List;
 import java.util.ArrayList;
@@ -26,9 +27,30 @@ public class KotesPanel extends JPanel implements ActionListener {
 		super(new GridBagLayout());
 		Entries = new ArrayList<Entry>();
 		loadFile("allnotes.txt");
+		System.out.println(Mem.get());
 		textEditor = new JEditorPane("text/plain",text);
-		contentManager = new TextContentManager(tagMap, textEditor);
+		JTabbedPane tabbedPane = new JTabbedPane();
+		contentManager = new TextContentManager(tagMap, textEditor, tabbedPane);
 		comboBox = new AutoComboBox(autocomplete, contentManager);
+		tabbedPane.setTabLayoutPolicy(JTabbedPane.SCROLL_TAB_LAYOUT);
+		tabbedPane.addTab("",null);
+		tabbedPane.addTab("+",null);
+		tabbedPane.addChangeListener(new ChangeListener(){
+			public void stateChanged(ChangeEvent e){
+				if( e.getSource() instanceof JTabbedPane){
+					JTabbedPane pane = (JTabbedPane) e.getSource();
+					int index = pane.getSelectedIndex();
+					if(index != -1)
+					if( index + 1 == pane.getTabCount()){
+						pane.setSelectedIndex(-1);
+						pane.insertTab("",null,null,null,index);	
+						pane.setSelectedIndex(index);
+					}else{
+						contentManager.setTag(pane.getTitleAt(index));
+					}
+				}
+			}
+		});
 		//		comboBox.putClientProperty("JComboBox.isTableCellEditor", Boolean.TRUE);
 		//		comboBox.setFocusTraversalKeysEnabled(false);
 		//textField.addActionListener(this);
@@ -43,6 +65,7 @@ public class KotesPanel extends JPanel implements ActionListener {
 		//add(textField, c);
 
 		add(comboBox,c);
+		add(tabbedPane, c);
 		c.fill = GridBagConstraints.BOTH;
 		c.weightx = 1.0;
 		c.weighty = 1.0;
@@ -61,6 +84,7 @@ public class KotesPanel extends JPanel implements ActionListener {
 			fis.close();
 			tagMap = new HashMap<String,Tag>(); 
 			String[] Tags = new String(data, "UTF-8").split("\\r?\\n#");
+			Tags[0] = Tags[0].substring(1);
 			for(String s: Tags){
 				String[] tag = s.split("\\r?\\n",2);
 				String text = "";
