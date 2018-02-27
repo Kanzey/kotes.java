@@ -21,9 +21,10 @@ public class ComboListener extends KeyAdapter
 	public void keyPressed(KeyEvent evt){
 		if(evt.getKeyCode() == KeyEvent.VK_ENTER){
 			String text = ((JTextField)evt.getSource()).getText();
+			JTextField textField = ((JTextField)cbListener.getEditor().getEditorComponent());
 			contentManager.setTag(text);
 			cbListener.setModel(new DefaultComboBoxModel(options));
-			((JTextField)cbListener.getEditor().getEditorComponent()).setText(text);
+			textField.setText(text);
 			cbListener.hidePopup();
 		}
 	}
@@ -45,7 +46,7 @@ public class ComboListener extends KeyAdapter
 		}
 	}
 
-	public Vector getFilteredList(String text)
+	public Vector<String> getFilteredList(String text)
 	{
 		Vector<String> v = new Vector<String>();
 		if(text.length() == 0 )

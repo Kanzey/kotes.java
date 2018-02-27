@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.lang.StringBuilder;
 import javax.swing.text.*;
 import javax.swing.JTabbedPane;
-import java.awt.Color;
 import java.util.Map;
 import javax.swing.text.DefaultHighlighter.DefaultHighlightPainter;
 
@@ -20,19 +19,22 @@ public class TextContentManager{
 		this.tabbedPane = tabbedPane;
 	}
 
-	public void setTag(String tagString){
+	public String setTag(String tagString){
 		List<HighlightData> hList = new ArrayList<HighlightData>();
 		StringBuilder sb = new StringBuilder();
 		Tag mainTag = tagMap.get(tagString);
 		tabbedPane.setTitleAt(tabbedPane.getSelectedIndex(), tagString);
-		if (currentTag == mainTag)
-			return;
 		Collection<Entry> entries;
 		if(mainTag != null)
 			entries = mainTag.getEntries();
-		else
-			return;
-
+		else{
+			textComponent.setText( "#" + tagString +'\n');
+			highlight(new HighlightData(0, tagString.length() +1, Tag.getDefaultPainter()));
+			currentTag = mainTag;
+			return null;
+		}
+		if (currentTag == mainTag)
+			return tagString;
 		currentTag = mainTag;
 		for(Entry e:entries){
 			for(Tag tag :e.getTags()){
@@ -50,6 +52,7 @@ public class TextContentManager{
 		for(HighlightData hd: hList)
 			highlight(hd);
 		System.out.println(Mem.get());
+		return tagString;
 	}
 
 	public void highlight(HighlightData hData){

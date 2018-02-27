@@ -21,7 +21,6 @@ public class KotesPanel extends JPanel implements ActionListener {
 	private Map<String, Tag> tagMap;
 	private Vector<String> autocomplete;
 	private String text ="";
-	private final static String newline = "\n";
 
 	public KotesPanel() {
 		super(new GridBagLayout());
@@ -115,23 +114,32 @@ public class KotesPanel extends JPanel implements ActionListener {
 
 
 	public void actionPerformed(ActionEvent evt) {
-		/*	String text = textField.getText();
-			int i=0;
-			try{
-			i = Integer.parseInt(text);
-			textEditor.setText(Entries.get(i).getText());
-			}catch(NumberFormatException e){
+			if( evt.getSource() instanceof AbstractButton){
+				String cmd = ((AbstractButton)evt.getSource()).getText();
+				try{
+					if(cmd.equals("Save")){
+						FileWriter out = new FileWriter("tmp.txt");
+						out.write(textEditor.getText());
+						out.close();
+					}
+				}catch(Exception f){
+					f.printStackTrace();
+				}
 			}
-			textField.selectAll();
-
-			textEditor.setCaretPosition(textEditor.getDocument().getLength());
-			*/	}
+	 	}
 
 		private static void createAndShowGUI() {
 			JFrame frame = new JFrame("Kotes");
 			frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-
-			frame.add(new KotesPanel());
+			KotesPanel kotes = new KotesPanel();
+		JMenu menu = new JMenu("File");
+		JMenuItem item = new JMenuItem("Save");
+		item.addActionListener(kotes);
+		menu.add(item);
+		JMenuBar bar = new JMenuBar();
+		bar.add(menu);
+		frame.setJMenuBar(bar);
+			frame.add(kotes);
 
 			frame.pack();
 			frame.setVisible(true);

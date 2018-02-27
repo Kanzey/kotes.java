@@ -1,4 +1,3 @@
-import java.util.List;
 import java.util.Set;
 import java.util.HashSet;
 import javax.swing.text.DefaultHighlighter.DefaultHighlightPainter;
@@ -7,7 +6,8 @@ public class Tag{
 	private String name;
 	private Set<Entry> entrySet;
 	private DefaultHighlightPainter painter;
-	static private PastelColorGenerator colorGenerator = new PastelColorGenerator();
+	static private PastelColorGenerator colorGenerator = new PastelColorGenerator(); 
+	static private DefaultHighlightPainter defaultPainter;
 
 	public Tag(String name){
 		this.name = name;
@@ -33,5 +33,11 @@ public class Tag{
 
 	public String toString(){
 		return name;
+	}
+
+	static public DefaultHighlightPainter getDefaultPainter(){
+		if(defaultPainter == null)
+			defaultPainter = new DefaultHighlightPainter(colorGenerator.nextColor());
+		return defaultPainter;
 	}
 }
