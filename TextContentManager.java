@@ -12,6 +12,7 @@ public class TextContentManager{
 	private Map<String,Tag> tagMap;
 	private JTabbedPane tabbedPane;
 	private Tag currentTag;
+	private Boolean wasChanged = false;
 
 	public TextContentManager(Map<String,Tag> tagMap, JTextComponent textComponent, JTabbedPane tabbedPane){
 		this.tagMap = tagMap;
@@ -31,6 +32,7 @@ public class TextContentManager{
 			textComponent.setText( "#" + tagString +'\n');
 			highlight(new HighlightData(0, tagString.length() +1, Tag.getDefaultPainter()));
 			currentTag = mainTag;
+			wasChanged = false;
 			return null;
 		}
 		if (currentTag == mainTag)
@@ -52,9 +54,17 @@ public class TextContentManager{
 		for(HighlightData hd: hList)
 			highlight(hd);
 		System.out.println(Mem.get());
+		wasChanged = false;
 		return tagString;
 	}
 
+	public void changed(Boolean value){
+		wasChanged = value;
+	}
+
+	public Boolean getChanged(){
+		return wasChanged;
+	}
 	public void highlight(HighlightData hData){
 		try{
 			textComponent.getHighlighter()
@@ -62,6 +72,10 @@ public class TextContentManager{
 
 		} catch (BadLocationException ex){
 		}
+	}
+
+	public Tag getCurrentTag(){
+		return currentTag;	
 	}
 
 	public class HighlightData{

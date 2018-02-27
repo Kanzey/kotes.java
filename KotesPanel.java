@@ -3,8 +3,7 @@
 import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
+import javax.swing.event.*;
 import java.io.*;
 import java.util.List;
 import java.util.ArrayList;
@@ -14,6 +13,7 @@ import java.util.Map;
 import java.util.HashMap;
 
 public class KotesPanel extends JPanel implements ActionListener {
+	static private String file = "allnotes.txt";
 	private TextContentManager contentManager;
 	protected JComboBox comboBox;	
 	protected JEditorPane textEditor;
@@ -25,9 +25,20 @@ public class KotesPanel extends JPanel implements ActionListener {
 	public KotesPanel() {
 		super(new GridBagLayout());
 		Entries = new ArrayList<Entry>();
-		loadFile("allnotes.txt");
+		loadFile(file);
 		System.out.println(Mem.get());
 		textEditor = new JEditorPane("text/plain",text);
+		textEditor.getDocument().addDocumentListener(new DocumentListener(){
+			public void insertUpdate(DocumentEvent e) {
+				contentManager.changed(true);
+			}
+			public void removeUpdate(DocumentEvent e) {
+				contentManager.changed(true);
+			}
+			public void changedUpdate(DocumentEvent e) {
+				//Plain text components do not fire these events
+			}
+		});
 		JTabbedPane tabbedPane = new JTabbedPane();
 		contentManager = new TextContentManager(tagMap, textEditor, tabbedPane);
 		comboBox = new AutoComboBox(autocomplete, contentManager);
@@ -40,13 +51,22 @@ public class KotesPanel extends JPanel implements ActionListener {
 					JTabbedPane pane = (JTabbedPane) e.getSource();
 					int index = pane.getSelectedIndex();
 					if(index != -1)
-					if( index + 1 == pane.getTabCount()){
-						pane.setSelectedIndex(-1);
-						pane.insertTab("",null,null,null,index);	
-						pane.setSelectedIndex(index);
-					}else{
-						contentManager.setTag(pane.getTitleAt(index));
-					}
+						if( index + 1 == pane.getTabCount()){
+							pane.setSelectedIndex(-1);
+							pane.insertTab("",null,null,null,index);	
+							pane.setSelectedIndex(index);
+						}else{
+							if(contentManager.getChanged()){
+								int a =JOptionPane.showConfirmDialog(null,
+										"File was changed", "Do you want to save changes?", JOptionPane.YES_NO_OPTION);
+								if(a == JOptionPane.YES_OPTION){
+									save();
+									contentManager.changed(false);
+								}
+
+							}
+							contentManager.setTag(pane.getTitleAt(index));
+						}
 				}
 			}
 		});
@@ -112,26 +132,35 @@ public class KotesPanel extends JPanel implements ActionListener {
 		}
 	}
 
-
 	public void actionPerformed(ActionEvent evt) {
-			if( evt.getSource() instanceof AbstractButton){
-				String cmd = ((AbstractButton)evt.getSource()).getText();
-				try{
-					if(cmd.equals("Save")){
-						FileWriter out = new FileWriter("tmp.txt");
-						out.write(textEditor.getText());
-						out.close();
-					}
-				}catch(Exception f){
-					f.printStackTrace();
-				}
+		if( evt.getSource() instanceof AbstractButton){
+			String cmd = ((AbstractButton)evt.getSource()).getText();
+			if(cmd.equals("Save")){
+				save();
 			}
-	 	}
+		}
+	}
 
-		private static void createAndShowGUI() {
-			JFrame frame = new JFrame("Kotes");
-			frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-			KotesPanel kotes = new KotesPanel();
+	public void save(){
+		try{
+			FileWriter out = new FileWriter(file);
+			StringBuilder sb = new StringBuilder();
+			sb.append(textEditor.getText());
+			List<Entry> l = new ArrayList<Entry>(Entries);
+			l.removeAll(contentManager.getCurrentTag().getEntries());
+			for(Entry e:l)
+				e.toString(sb);
+			out.write(sb.toString());
+			out.close();
+		}catch(Exception f){
+			f.printStackTrace();
+		}
+	}
+
+	private static void createAndShowGUI() {
+		JFrame frame = new JFrame("Kotes");
+		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		KotesPanel kotes = new KotesPanel();
 		JMenu menu = new JMenu("File");
 		JMenuItem item = new JMenuItem("Save");
 		item.addActionListener(kotes);
@@ -139,11 +168,12 @@ public class KotesPanel extends JPanel implements ActionListener {
 		JMenuBar bar = new JMenuBar();
 		bar.add(menu);
 		frame.setJMenuBar(bar);
-			frame.add(kotes);
+		frame.add(kotes);
 
-			frame.pack();
-			frame.setVisible(true);
-		}
+		frame.pack();
+		frame.setVisible(true);
+	}
+
 
 	public static void main(String[] args) {
 		javax.swing.SwingUtilities.invokeLater(new Runnable() {
